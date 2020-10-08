@@ -36,10 +36,6 @@ export default class App extends Component {
     }
     this.state = {
       isLoggedIn: false,
-      user_name: '',
-      groupName: '',
-      user_id: '',
-      groups: [],
       feed: [],
       isEmpFeed: false,
     };
@@ -70,77 +66,38 @@ export default class App extends Component {
       alert('Error fetching data: ' + error.toString());
     } else {
       this.setState({isLoggedIn: true});
-      this.setState({user_name: result.name});
-      this.setState({user_id: result.id});
-      // console.log(result.groups.data[0]);
-      var groupsArray = result.groups.data;
-      var expGroupsArray = groupsArray.map(function (el) {
-        var arr = Object.assign({}, el);
-        arr.isExpanded = false;
-        return arr;
-      });
-      expGroupsArray.reverse();
-      if (!('feed' in expGroupsArray[0])) {
-        this.setState({groupName: expGroupsArray[0].name});
-        this.setState({groups: expGroupsArray});
-        this.setState({feed: []});
-        this.setState({isEmpFeed: true});
-        console.log('feed is empty!');
+      if (result.data === undefined || result.data.length == 0) {
+        console.log('empty feed');
+        this.setState({
+          feed: [],
+          isEmpFeed: true,
+        });
       } else {
-        var feedArray = expGroupsArray[0].feed.data;
+        var feedArray = result.data;
         var expFeedArray = feedArray.map(function (el) {
           var arr = Object.assign({}, el);
           arr.isExpanded = false;
-          arr.isSaved = false;
           return arr;
         });
-        // expFeedArray.filter((c) => c.message !== '');
         expFeedArray.pop();
-        this.setState({groupName: expGroupsArray[0].name});
         this.setState({feed: expFeedArray});
-        this.setState({groups: expGroupsArray});
+        console.log(this.state.feed);
       }
     }
   };
-
-  lastSevenDays() {
-    var ourDate = new Date();
-    var pastDate = ourDate.getDate() - 7;
-    ourDate.setDate(pastDate);
-    console.log(ourDate.toDateString());
-    return ourDate.toDateString();
-  }
-  getDateForLastOccurence(strDay) {
-    var weekdays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thurs', 'Fri', 'Sat'];
-    var date = new Date();
-    var date2 = new Date();
-    var today = date.getDay();
-    if (today === 4) {
-      console.log('It is thursday');
-      var newDate = date2.getDate() - 7;
-      date2.setDate(newDate);
-      console.log('Prev thursday: ' + date2.toDateString());
-      return date2.toDateString();
-    } else {
-      var index = weekdays.indexOf(strDay);
-      var difference = date.getDay() - index;
-      if (difference < 0) {
-        difference = -7 - difference;
-      }
-      date.setDate(date.getDate() + difference);
-      var justDate = date.toDateString();
-      console.log('last thurs: ' + justDate);
-      return justDate;
+  getDateForLastOccurence(date, day) {
+    const d = new Date(date.getTime());
+    const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thurs', 'Fri', 'Sat'];
+    if (days.includes(day)) {
+      const modifier = (d.getDay() + days.length - days.indexOf(day)) % 7 || 7;
+      d.setDate(d.getDate() - modifier);
     }
+    return d.toDateString();
   }
   onLogout = () => {
     //Clear the state after logout
     this.setState({
-      user_name: null,
-      groupName: null,
-      user_id: null,
       isLoggedIn: false,
-      groups: [],
       feed: [],
       isEmpFeed: false,
     });
@@ -176,9 +133,10 @@ export default class App extends Component {
                   // 'me?fields=name,id,groups'
                   // me?fields=name,id,groups{id,name,feed{message,link,full_picture}}
                   const processRequest = new GraphRequest(
-                    `me?fields=name,id,groups{id,name,feed.since(${this.getDateForLastOccurence(
+                    `334488667640512/feed?fields=id,name,message,link,full_picture&since=${this.getDateForLastOccurence(
+                      new Date(),
                       'Thurs',
-                    )}){message,link,full_picture,name}}`,
+                    )}`,
                     null,
                     this.get_Response_Info,
                   );
@@ -191,10 +149,7 @@ export default class App extends Component {
           />
           {this.state.isLoggedIn === true ? (
             <View style={{alignItems: 'center', padding: 10}}>
-              <Text style={styles.userText}>
-                Logged in as: {this.state.user_name}
-              </Text>
-              <Text style={styles.topHeading}>{this.state.groupName}</Text>
+              <Text style={styles.topHeading}>Your Songs</Text>
               {this.state.isEmpFeed === true ? (
                 <View
                   style={{
