@@ -88,13 +88,14 @@ export default class App extends Component {
         console.log('feed is empty!');
       } else {
         var feedArray = expGroupsArray[0].feed.data;
-        console.log(feedArray);
         var expFeedArray = feedArray.map(function (el) {
           var arr = Object.assign({}, el);
           arr.isExpanded = false;
           arr.isSaved = false;
           return arr;
         });
+        // expFeedArray.filter((c) => c.message !== '');
+        expFeedArray.pop();
         this.setState({groupName: expGroupsArray[0].name});
         this.setState({feed: expFeedArray});
         this.setState({groups: expGroupsArray});
@@ -104,7 +105,7 @@ export default class App extends Component {
 
   lastSevenDays() {
     var ourDate = new Date();
-    var pastDate = ourDate.getDate();
+    var pastDate = ourDate.getDate() - 7;
     ourDate.setDate(pastDate);
     console.log(ourDate.toDateString());
     return ourDate.toDateString();
@@ -112,15 +113,25 @@ export default class App extends Component {
   getDateForLastOccurence(strDay) {
     var weekdays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thurs', 'Fri', 'Sat'];
     var date = new Date();
-    var index = weekdays.indexOf(strDay);
-    var difference = date.getDay() - index;
-    if (difference < 0) {
-      difference = -7 - difference;
+    var date2 = new Date();
+    var today = date.getDay();
+    if (today === 4) {
+      console.log('It is thursday');
+      var newDate = date2.getDate() - 7;
+      date2.setDate(newDate);
+      console.log('Prev thursday: ' + date2.toDateString());
+      return date2.toDateString();
+    } else {
+      var index = weekdays.indexOf(strDay);
+      var difference = date.getDay() - index;
+      if (difference < 0) {
+        difference = -7 - difference;
+      }
+      date.setDate(date.getDate() + difference);
+      var justDate = date.toDateString();
+      console.log('last thurs: ' + justDate);
+      return justDate;
     }
-    date.setDate(date.getDate() + difference);
-    var justDate = date.toDateString();
-    console.log('last thurs: ' + justDate);
-    return justDate;
   }
   onLogout = () => {
     //Clear the state after logout

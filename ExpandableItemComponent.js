@@ -108,8 +108,8 @@ export default class ExpandableItemComponent extends Component {
                 source={{ uri: this.props.item.full_picture }}
                 style={styles.imageStyle}
                 />
+                {/* <Text style={styles.text}>{this.props.item.message}</Text> */}
                 <Text style={styles.text}>{this.props.item.message.replace(this.props.item.link, '')}</Text>
-                {/* <Text style={styles.text}>{this.filteredMsg.bind(this, this.props.item)}</Text> */}
               </View>
               <View style={styles.separator} />
             </TouchableOpacity>
